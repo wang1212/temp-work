@@ -1,13 +1,18 @@
-'use strict';
+/*! TD router */
 
-const express = require('express'),
-	router    = express.Router(),
-	db_client = require('../db/index'),
-	session   = require('express-session');
+'use strict';
 
 const assert = require('assert'),
 	chalk = require('chalk'),
 	_     = require('lodash');
+
+const express = require('express'),
+	router    = express.Router(),
+	session   = require('express-session');
+
+const db_util = require('../db/index'),
+	user_model = require('../models/user'),
+	design_model = require('../models/design');
 
 const SUCCESSFUL_CODE = '200',
 	FAIL_CODE = '403',
@@ -75,11 +80,7 @@ router.post('/sign-in', async (req, res) => {
 	const params = req.body;
 
 	try {
-		await db_client.connect();
-		console.log(chalk.blue("Connected successfully to mongoDB server."));
-
-		const db = db_client.db('app');
-
+		const db = db_util.db_client.db('app');
 		const docs = await db.collection('user').find({ username: params.username }).toArray();
 
 		if (docs.length) {
@@ -103,8 +104,6 @@ router.post('/sign-in', async (req, res) => {
 		res.status(500).send(`Error: ${err.message}`);
 	}
 
-	//db_client.close();
-
 });
 
 
@@ -125,11 +124,7 @@ router.get('/sign-out', (req, res) => {
 router.get('/users', async (req, res) => {
 
 	try {
-		await db_client.connect();
-		console.log(chalk.blue("Connected successfully to mongoDB server."));
-
-		const db = db_client.db('app');
-
+		const db = db_util.db_client.db('app');
 		const users = await db.collection('user').find({}).toArray();
 
 		res.json({ code: SUCCESSFUL_CODE, data: users });
@@ -139,20 +134,14 @@ router.get('/users', async (req, res) => {
 		return res.status(500).send(`Error: ${err.message}`);
 	}
 
-	//db_client.close();
-
 });
 
 
 router.get('/designs', async (req, res) => {
 
 	try {
-		await db_client.connect();
-		console.log(chalk.blue("Connected successfully to mongoDB server."));
-
-		const db = db_client.db('app');
-
-		const designs = await db.collection('design').find({}).toArray();
+		const db = db_util.db_client.db('app');
+		const designs = await db.collection('design').find({ upload_user_id: req.session.user._id }).toArray();
 
 		res.json({ code: SUCCESSFUL_CODE, data: designs });
 
@@ -161,24 +150,51 @@ router.get('/designs', async (req, res) => {
 		return res.status(500).send(`Error: ${err.message}`);
 	}
 
-	//db_client.close();
 });
 
 
-router.post('/designs', async (req, res) => {
+router.post('/designs/:uid', async (req, res) => {
+
+	const uid = req.params.uid;
+	const params = req.body;
 
 	try {
-		await db_client.connect();
-		console.log(chalk.blue("Connected successfully to mongoDB server."));
+		const db = db_util.db_client.db('app');
+		let r;
+		// find
+		r = await db.collection('design').find({ uid }).toArray();
 
-		const db = db_client.db('app');
+		// exist
+		if (r.length) {
+			// UPDATE
+			r = await db.collection('design').updateOne({ uid }, {
+				$set: {
+					...params,
+					update_time: Date.now()
+				}
+			});
 
-		const r = await db.collection('design').insertOne({});
+			if (r.modifiedCount === 1) {
+				res.json({ code: SUCCESSFUL_CODE, msg: '同步成功！' });
+			} else {
+				res.json({ code: FAIL_CODE, msg: '同步失败！' });
+			}
 
-		if (r.insertedCount === 1) {
-			res.json({ code: SUCCESSFUL_CODE, msg: '上传成功！' });
 		} else {
-			res.json({ code: FAIL_CODE, msg: '上传失败！' });
+			// CREATE
+			r = await db.collection('design').insertOne({
+				...design_model,
+				...params,
+				upload_user_id: req.session.user._id,
+				create_time: Date.now(),
+				update_time: Date.now()
+			});
+
+			if (r.insertedCount === 1) {
+				res.json({ code: SUCCESSFUL_CODE, msg: '上传成功！' });
+			} else {
+				res.json({ code: FAIL_CODE, msg: '上传失败！' });
+			}
 		}
 
 	} catch (err) {
@@ -186,7 +202,30 @@ router.post('/designs', async (req, res) => {
 		return res.status(500).send(`Error: ${err.message}`);
 	}
 
-	//db_client.close();
+});
+
+
+router.delete('/designs', async (req, res) => {
+
+	const params = req.query;
+
+	try {
+		const db = db_util.db_client.db('app');
+
+		// DELETE
+		const r = await db.collection('design').deleteMany({ uid: { $in: params.uid }, upload_user_id: req.session.user._id });
+
+		if (r.deletedCount === params.uid.length) {
+			res.json({ code: SUCCESSFUL_CODE, msg: '删除成功！' });
+		} else {
+			res.json({ code: FAIL_CODE, msg: '删除失败！' });
+		}
+
+	} catch (err) {
+		console.error(chalk.red(err.message));
+		return res.status(500).send(`Error: ${err.message}`);
+	}
+
 });
 
 

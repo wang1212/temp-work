@@ -1,9 +1,12 @@
 'use strict';
 
 const design = {
-	user_id: '',
-	name: '',
-	data: '',
+	uid           : null,
+	name          : '',
+	data          : null,
+	upload_user_id: null,
+	create_time   : 0,
+	update_time   : 0,
 };
 
 
