@@ -3,15 +3,16 @@
 'use strict';
 
 const assert = require('assert'),
-	chalk = require('chalk'),
-	_     = require('lodash');
+	chalk    = require('chalk'),
+	_        = require('lodash'),
+	ObjectId = require('mongodb').ObjectId;
 
 const express = require('express'),
-	router    = express.Router(),
-	session   = require('express-session');
+	router  = express.Router(),
+	session = require('express-session');
 
 const db_util = require('../db/index'),
-	user_model = require('../models/user'),
+	user_model   = require('../models/user'),
 	design_model = require('../models/design');
 
 const SUCCESSFUL_CODE = '200',
@@ -125,9 +126,83 @@ router.get('/users', async (req, res) => {
 
 	try {
 		const db = db_util.db_client.db('app');
-		const users = await db.collection('user').find({}).toArray();
+		let users = [req.session.user];
+
+		if (req.session.user.auth == 'admin') {
+			users = await db.collection('user').find({ active: true }).toArray();
+		}
 
 		res.json({ code: SUCCESSFUL_CODE, data: users });
+
+	} catch (err) {
+		console.error(chalk.red(err.message));
+		return res.status(500).send(`Error: ${err.message}`);
+	}
+
+});
+
+
+router.post('/users', async (req, res) => {
+
+	const params = req.body;
+
+	try {
+		const db = db_util.db_client.db('app');
+
+		if (req.session.user.auth === 'admin') {
+			let r;
+			// find
+			r = await db.collection('user').find({ username: params.username }).toArray();
+
+			// exist
+			if (r.length) {
+				res.json({ code: FAIL_CODE, msg: '失败，用户名已被占用！' });
+			} else {
+				// CREATE
+				r = await db.collection('user').insertOne({
+					...user_model,
+					...params,
+					active: true,
+				});
+
+				if (r.insertedCount === 1) {
+					res.json({ code: SUCCESSFUL_CODE, msg: '添加用户成功！' });
+				} else {
+					res.json({ code: FAIL_CODE, msg: '添加用户失败！' });
+				}
+			}
+
+		} else {
+			res.json({ code: FAIL_CODE, msg: '没有权限！' });
+		}
+
+	} catch (err) {
+		console.error(chalk.red(err.message));
+		return res.status(500).send(`Error: ${err.message}`);
+	}
+
+});
+
+
+router.delete('/users', async (req, res) => {
+
+	const params = req.query;
+
+	try {
+		const db = db_util.db_client.db('app');
+
+		if (req.session.user.auth === 'admin') {
+			// DELETE
+			const r = await db.collection('user').deleteMany({ _id: { $in: params.id.map(id => ObjectId(id)) } });
+
+			if (r.deletedCount === params.id.length) {
+				res.json({ code: SUCCESSFUL_CODE, msg: '删除成功！' });
+			} else {
+				res.json({ code: FAIL_CODE, msg: '删除失败！' });
+			}
+		} else {
+			res.json({ code: FAIL_CODE, msg: '没有权限！' });
+		}
 
 	} catch (err) {
 		console.error(chalk.red(err.message));
@@ -141,7 +216,13 @@ router.get('/designs', async (req, res) => {
 
 	try {
 		const db = db_util.db_client.db('app');
-		const designs = await db.collection('design').find({ upload_user_id: req.session.user._id }).toArray();
+		let designs;
+
+		if (req.session.user.auth === 'admin') {
+			designs = await db.collection('design').find({}).toArray();
+		} else {
+			designs = await db.collection('design').find({ upload_user_id: req.session.user._id }).toArray();
+		}
 
 		res.json({ code: SUCCESSFUL_CODE, data: designs });
 

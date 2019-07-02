@@ -10,13 +10,16 @@ const user = {
 	unit    : '',
 	mark    : '',
 	auth    : '',
+	active  : false,
 };
 
 const admin = {
 	username: 'admin',
 	password: '123',
-	name: '管理员',
-	auth: 'admin',
+	name    : '管理员',
+	sex     : '男',
+	auth    : 'admin',
+	active  : true
 };
 
 
