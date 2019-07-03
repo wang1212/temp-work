@@ -6,7 +6,8 @@ const chalk = require('chalk');
 
 const MongoClient = require('mongodb').MongoClient;
 
-const db_url = 'mongodb://127.0.0.1:27017';
+const db_url = 'mongodb://127.0.0.1:27017',
+	db_name = 'TD';
 
 let db_client = null;
 
@@ -30,6 +31,7 @@ function connect_db () {
 
 
 module.exports = {
+	db_name,
 	connect_db,
 	db_client,
 };

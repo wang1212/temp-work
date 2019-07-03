@@ -81,7 +81,7 @@ router.post('/sign-in', async (req, res) => {
 	const params = req.body;
 
 	try {
-		const db = db_util.db_client.db('app');
+		const db = db_util.db_client.db(db_util.db_name);
 		const docs = await db.collection('user').find({ username: params.username }).toArray();
 
 		if (docs.length) {
@@ -125,7 +125,7 @@ router.get('/sign-out', (req, res) => {
 router.get('/users', async (req, res) => {
 
 	try {
-		const db = db_util.db_client.db('app');
+		const db = db_util.db_client.db(db_util.db_name);
 		let users = [req.session.user];
 
 		if (req.session.user.auth == 'admin') {
@@ -147,7 +147,7 @@ router.post('/users', async (req, res) => {
 	const params = req.body;
 
 	try {
-		const db = db_util.db_client.db('app');
+		const db = db_util.db_client.db(db_util.db_name);
 
 		if (req.session.user.auth === 'admin') {
 			let r;
@@ -189,7 +189,7 @@ router.delete('/users', async (req, res) => {
 	const params = req.query;
 
 	try {
-		const db = db_util.db_client.db('app');
+		const db = db_util.db_client.db(db_util.db_name);
 
 		if (req.session.user.auth === 'admin') {
 			// DELETE
@@ -215,7 +215,7 @@ router.delete('/users', async (req, res) => {
 router.get('/designs', async (req, res) => {
 
 	try {
-		const db = db_util.db_client.db('app');
+		const db = db_util.db_client.db(db_util.db_name);
 		let designs;
 
 		if (req.session.user.auth === 'admin') {
@@ -240,7 +240,7 @@ router.post('/designs/:uid', async (req, res) => {
 	const params = req.body;
 
 	try {
-		const db = db_util.db_client.db('app');
+		const db = db_util.db_client.db(db_util.db_name);
 		let r;
 		// find
 		r = await db.collection('design').find({ uid }).toArray();
@@ -291,7 +291,7 @@ router.delete('/designs', async (req, res) => {
 	const params = req.query;
 
 	try {
-		const db = db_util.db_client.db('app');
+		const db = db_util.db_client.db(db_util.db_name);
 
 		// DELETE
 		const r = await db.collection('design').deleteMany({ uid: { $in: params.uid }, upload_user_id: req.session.user._id });
