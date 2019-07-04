@@ -25,7 +25,7 @@ app.use('/App', require('./routes/td'));
 
 
 require('./db/index').connect_db().then(db_client => {
-	app.listen(8080, () => console.log(chalk.blue('App listening on port 3000!')));
+	app.listen(8880, () => console.log(chalk.blue('App listening on port 3000!')));
 }).catch(err => {
 	console.error(chalk.red(err.stack));
 });
