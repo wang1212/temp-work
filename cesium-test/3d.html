@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="vendors/Cesium-1.60/Build/CesiumUnminified/Cesium.js"></script>
+    <style>
+      @import url(vendors/Cesium-1.60/Build/CesiumUnminified/Widgets/widgets.css);
+      #cesiumContainer {position: absolute; top: 0; right: 0; bottom: 0; left: 0;}
+    </style>
+  </head>
+  <body>
+    <div id="cesiumContainer"></div>
+    <script>
+    var viewer = new Cesium.Viewer('cesiumContainer', {
+      animation: false,
+      baseLayerPicker: false,
+      navigationHelpButton: false,
+      sceneModePicker: false,
+      homeButton: false,
+      geocoder: false,
+      fullscreenButton: false,
+      imageryProvider: new Cesium.UrlTemplateImageryProvider({
+        url: 'maptiler/tiles/satellite/{z}/{x}/{y}.jpg?key=cCrASxlDHZ6nkn8SLlp2',
+        minimumLevel: 0,
+        maximumLevel: 20,
+        credit: new Cesium.Credit('<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>', true)
+      }),
+      timeline: false,
+      terrainProvider: new Cesium.CesiumTerrainProvider({
+        url: 'maptiler/tiles/terrain-quantized-mesh/?key=cCrASxlDHZ6nkn8SLlp2',
+        credit: new Cesium.Credit('<a href="https://www.maptiler.com/copyright/" target="_blank">© MapTiler</a> <a href="https://www.openstreetmap.org/copyright" target="_blank">© OpenStreetMap contributors</a>', true),
+        requestVertexNormals: true
+      })
+    });
+    viewer.camera.setView({
+      destination: Cesium.Cartesian3.fromDegrees(8.67, 46.72, 4300),
+      orientation: {
+        pitch: Cesium.Math.toRadians(-20)
+      }
+    });
+    </script>
+  </body>
+</html>
