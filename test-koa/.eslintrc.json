@@ -1,0 +1,48 @@
+{
+    "env": {
+        "node"   : true,
+        "es2020" : true,
+        "jest"   : true
+    },
+    "extends"      : [
+        "eslint:recommended",
+        "plugin:prettier/recommended",
+        "prettier/flowtype"
+    ],
+    "parserOptions": {
+        // "ecmaVersion": 2020,
+        "ecmaFeatures": {
+            "experimentalObjectRestSpread": true
+        },
+        "sourceType": "module"
+    },
+    "plugins": [],
+    "rules"  : {
+        // "no-console": [
+        //     "error",
+        //     {
+        //         "allow": [
+        //             "warn",
+        //             "error"
+        //         ]
+        //     }
+        // ],
+        "indent": [
+            "error",
+            "tab"
+        ],
+        "linebreak-style": [
+            "error",
+            "windows"
+        ],
+        "quotes": [
+            "error",
+            "single"
+        ],
+        "semi": [
+            "error",
+            "never"
+        ]
+    },
+    "globals": {}
+}

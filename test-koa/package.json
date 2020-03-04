@@ -1,0 +1,34 @@
+{
+  "name": "test-koa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "node": "node bin/node-esm.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@koa/router": "^8.0.8",
+    "apollo-server-koa": "^2.10.0",
+    "bcrypt": "^3.0.8",
+    "chalk": "^3.0.0",
+    "esm": "^3.2.25",
+    "jsonwebtoken": "^8.5.1",
+    "koa": "^2.11.0",
+    "koa-bodyparser": "^4.2.1",
+    "koa-jwt": "^3.6.0",
+    "koa-log4": "^2.3.2",
+    "lodash": "^4.17.15",
+    "mongoose": "^5.9.1"
+  },
+  "devDependencies": {
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "nodemon": "^2.0.2",
+    "prettier": "1.19.1"
+  }
+}
